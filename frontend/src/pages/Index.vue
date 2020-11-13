@@ -1,14 +1,15 @@
 <template>
   <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-full.svg"
-    >
+    <AdminTable />
   </q-page>
 </template>
 
 <script>
+import AdminTable from 'components/AdminTable.vue'
+
 export default {
-  name: 'PageIndex'
+  name: 'PageIndex',
+  components: { AdminTable }
 }
+
 </script>
