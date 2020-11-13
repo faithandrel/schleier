@@ -1,5 +1,30 @@
 <template>
 	<div class="q-pa-md">
+		<div>
+			<q-btn label="Add User" color="primary" @click="prompt = true" />
+		</div>
+		<q-dialog v-model="prompt" persistent>
+			<q-card style="min-width: 350px">
+				<q-card-section>
+				  <div class="text-h6">Name</div>
+				</q-card-section>
+				<q-card-section class="q-pt-none">
+				  <q-input dense v-model="newUser" autofocus />
+				</q-card-section>
+
+				<q-card-section>
+				  <div class="text-h6">Email</div>
+				</q-card-section>
+				<q-card-section class="q-pt-none">
+				  <q-input dense v-model="newEmail" />
+				</q-card-section>
+
+				<q-card-actions align="right" class="text-primary">
+				  <q-btn flat label="Cancel" v-close-popup />
+				  <q-btn flat label="Save" @click="saveNewUser()" v-close-popup />
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
 	    <q-table
 	      title="Users"
 	      :data="rows"
@@ -13,8 +38,11 @@
 import Users from '../services/users.js'
 
 export default {
-	data () {
+	data() {
 	    return {
+	    	prompt: false,
+	    	newEmail: '',
+	    	newUser: '',
 			columns: [
 				{
 					name: 'name',
@@ -81,8 +109,13 @@ export default {
 	},
 	async mounted() {
 		const users = await Users.getAllUsers()
-		console.log(users)
 		this.rows = users
+	},
+	methods: {
+		async saveNewUser() {
+			const user = await Users.saveNewUser(this.newUser, this.newEmail)
+			console.log(user)
+		}
 	}
 }
 </script>
