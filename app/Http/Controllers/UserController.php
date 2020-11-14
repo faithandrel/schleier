@@ -63,4 +63,13 @@ class UserController extends Controller
 
 		return response()->json($user);
 	}
+
+	public function disableUsers(Request $request) {
+		$userIds = $request->get('users');
+
+		$result = User::whereIn('id', $userIds)
+        			  ->update(['status' => 2]);
+
+		return response()->json($userIds);
+	}
 }

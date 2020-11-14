@@ -2,6 +2,8 @@
 	<div class="q-pa-md">
 		<div>
 			<q-btn label="Add User" color="primary" @click="prompt = true" />
+			<q-btn label="Disable" color="red"
+				   v-if="selected.length > 0 " @click="disableUsers()" />
 		</div>
 		<q-dialog v-model="prompt" persistent>
 			<q-card style="min-width: 350px">
@@ -29,7 +31,9 @@
 	      title="Users"
 	      :data="rows"
 	      :columns="columns"
-	      row-key="name"
+	      row-key="email"
+	      selection="multiple"
+	      :selected.sync="selected"
 	    />
   	</div>
 </template>
@@ -43,6 +47,7 @@ export default {
 	    	prompt: false,
 	    	newEmail: '',
 	    	newUser: '',
+	    	selected: [],
 			columns: [
 				{
 					name: 'name',
@@ -108,13 +113,21 @@ export default {
 		}
 	},
 	async mounted() {
-		const users = await Users.getAllUsers()
-		this.rows = users
+		this.updateUsers()
 	},
 	methods: {
+		async updateUsers() {
+			const users = await Users.getAllUsers()
+			this.rows = users
+		},
 		async saveNewUser() {
-			const user = await Users.saveNewUser(this.newUser, this.newEmail)
-			console.log(user)
+			await Users.saveNewUser(this.newUser, this.newEmail)
+			this.updateUsers()
+		},
+		async disableUsers() {
+			const userIds = this.selected.map((user) => user.id)
+			await Users.disableUsers(userIds)
+			this.updateUsers()
 		}
 	}
 }

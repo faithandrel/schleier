@@ -46,6 +46,17 @@ class Users {
     })
     return Data.data
   }
+
+  static async disableUsers(userIds) {
+    const Data = await axios({
+      method: 'POST',
+      url: BACKEND + '/users/disable',
+      data: {
+        users: userIds
+      }
+    })
+    return Data.data
+  }
 }
 
 export default Users
