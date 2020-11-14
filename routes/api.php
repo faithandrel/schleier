@@ -23,3 +23,4 @@ Route::post('users/disable', 'App\Http\Controllers\UserController@disableUsers')
 Route::get('users', 'App\Http\Controllers\UserController@index');
 Route::post('invite', 'App\Http\Controllers\UserController@getInvite');
 Route::post('profile', 'App\Http\Controllers\UserController@saveProfile');
+Route::post('avatar', 'App\Http\Controllers\UserController@saveAvatar');

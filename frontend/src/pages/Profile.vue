@@ -3,7 +3,12 @@
 		<div v-if="status == 0">
 			<p>Register for {{ email }}</p>
 			<q-input v-model="name" label="Name" stack-label />
-			<q-input v-model="password" type="password" stack-label />
+			<q-input v-model="password" label="Password" type="password" stack-label />
+		    <q-file v-model="avatar" label="Avatar" accept=".jpg, image/*">
+		        <template v-slot:prepend>
+		        	<q-icon name="attach_file" />
+		        </template>
+		    </q-file>
 			<q-btn color="primary" label="Save" @click="saveProfile()" />
 		</div>
 		<div v-if="status == 1">
@@ -24,6 +29,7 @@ export default {
 			name: '',
 			password: '',
 			email: '',
+			avatar: null,
 			invite: '',
 			status: 2
 		}
@@ -42,8 +48,13 @@ export default {
 					invite: this.invite,
 					email: this.email,
 					name: this.name,
-					password: this.password
+					password: this.password,
+					avatar: this.avatar
 				})
+			if (this.avatar) {
+				const result = await Users.saveAvatar(this.avatar, this.email)
+				console.log(result)
+			}
 			console.log(user)
 		}
 	}

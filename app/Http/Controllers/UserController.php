@@ -64,6 +64,16 @@ class UserController extends Controller
 		return response()->json($user);
 	}
 
+	public function saveAvatar(Request $request) {
+		$user = User::where('email', $request->get('email'))->first();
+
+		$filename = 'avatar.'.$request->file->getClientOriginalExtension();
+	
+		$request->file->move(public_path('avatars/'.$user->id), $filename);
+		
+		return response()->json();
+	}
+
 	public function disableUsers(Request $request) {
 		$userIds = $request->get('users');
 
