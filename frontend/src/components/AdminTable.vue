@@ -34,12 +34,28 @@
 	      row-key="email"
 	      selection="multiple"
 	      :selected.sync="selected"
-	    />
+	    >
+	    	<template v-slot:body="props">
+				<q-tr :props="props" @click="props.selected = true">
+        			<q-td>
+          				<q-checkbox v-model="props.selected" color="primary" />
+        			</q-td>
+        			<q-td v-for="col in props.cols" :key="col.name" :props="props">
+        				<span v-if="col.name != 'avatar'">{{col.value}}</span>
+        				<span v-else>
+        					<img :src="col.value" />
+        				</span>
+        			</q-td>
+      			</q-tr>
+			</template>
+		</q-table>
   	</div>
 </template>
 
 <script>
+import { date } from 'quasar'
 import Users from '../services/users.js'
+import { BASE_URL } from '../constants.js'
 
 export default {
 	data() {
@@ -49,6 +65,20 @@ export default {
 	    	newUser: '',
 	    	selected: [],
 			columns: [
+				{
+					name: 'avatar',
+					label: 'Avatar',
+					align: 'left',
+					field: 'avatar',
+					format: (val, row) => {
+						if (!val) {
+							return ''
+						}
+						const ext = val.substr(val.lastIndexOf('.') + 1)
+						return BASE_URL + '/avatars/' + row.id + '/thumbnail.' + ext
+					},
+					sortable: true
+				},
 				{
 					name: 'name',
 					label: 'Name',
@@ -68,6 +98,12 @@ export default {
 					label: 'Created At',
 					align: 'left',
 					field: 'created_at',
+					format: (val, row) => {
+						if (!val) {
+							return ''
+						}
+						return date.formatDate(val, 'YYYY-MM-DD')
+					},
 					sortable: true
 				},
 				{
@@ -101,9 +137,9 @@ export default {
 					field: 'signed_up_at',
 					format: (val, row) => {
 						if (!val) {
-							return 'N/A'
+							return ''
 						}
-						return val
+						return date.formatDate(val, 'YYYY-MM-DD')
 					},
 					sortable: true
 				}
@@ -121,6 +157,8 @@ export default {
 			this.rows = users
 		},
 		async saveNewUser() {
+			this.newUser = ''
+			this.newEmail = ''
 			await Users.saveNewUser(this.newUser, this.newEmail)
 			this.updateUsers()
 		},

@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Intervention\Image\ImageManager;
 use App\Http\Requests\AddEmailRequest;
 use App\Http\Requests\ProfileRequest;
 use App\Models\User;
@@ -43,7 +44,8 @@ class UserController extends Controller
 		return response()->json([
 			'name' => $user->name,
 			'email' => $user->email,
-			'status' => $user->status
+			'status' => $user->status,
+			'avatar' => $user->avatar
 		]);
 	}
 
@@ -66,12 +68,24 @@ class UserController extends Controller
 
 	public function saveAvatar(Request $request) {
 		$user = User::where('email', $request->get('email'))->first();
+		$avatarFilename = 'avatar.'.$request->file->getClientOriginalExtension();
+		$thumbnailFilename = 'thumbnail.'.$request->file->getClientOriginalExtension();
 
-		$filename = 'avatar.'.$request->file->getClientOriginalExtension();
-	
-		$request->file->move(public_path('avatars/'.$user->id), $filename);
+		$request->file->move(public_path('avatars/'.$user->id), $avatarFilename);
 		
-		return response()->json();
+		$manager = new ImageManager(array('driver' => 'imagick'));
+		$avatarFile = public_path('avatars/'.$user->id).'/'.$avatarFilename;
+		
+		$image = $manager->make($avatarFile)->resize(256, 256);
+		$image->save(public_path('avatars/'.$user->id).'/'.$avatarFilename);
+
+		$image = $manager->make($avatarFile)->resize(64, 64);
+		$image->save(public_path('avatars/'.$user->id).'/'.$thumbnailFilename);
+
+		$user->avatar = 'avatars/'.$user->id.'/'.$avatarFilename;
+		$user->save();
+
+		return response()->json([$user->avatar]);
 	}
 
 	public function disableUsers(Request $request) {

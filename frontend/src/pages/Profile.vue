@@ -12,7 +12,10 @@
 			<q-btn color="primary" label="Save" @click="saveProfile()" />
 		</div>
 		<div v-if="status == 1">
-			<p>You have already signed up.</p>
+			<h4>Profile</h4>
+			<img :src="image" />
+			<p>{{ name }}</p>
+			<p>{{ email }}</p>
 		</div>
 		<div v-if="status == 2">
 			<p>Invalid invite.</p>
@@ -22,6 +25,7 @@
 
 <script>
 import Users from '../services/users.js'
+import { BASE_URL } from '../constants.js'
 
 export default {
 	data () {
@@ -30,6 +34,7 @@ export default {
 			password: '',
 			email: '',
 			avatar: null,
+			image: '',
 			invite: '',
 			status: 2
 		}
@@ -41,21 +46,28 @@ export default {
 		this.invite = query.invite
 		this.email = user.email
 		this.status = user.status
+		if (user.avatar) {
+			this.image = user.avatar
+		}
 	},
 	methods: {
 		async saveProfile() {
-			const user = await Users.saveProfile({
+			try {
+				await Users.saveProfile({
 					invite: this.invite,
 					email: this.email,
 					name: this.name,
 					password: this.password,
 					avatar: this.avatar
 				})
-			if (this.avatar) {
-				const result = await Users.saveAvatar(this.avatar, this.email)
-				console.log(result)
+				if (this.avatar) {
+					const image = await Users.saveAvatar(this.avatar, this.email)
+					this.image = BASE_URL + '/' + image
+				}
+			} catch (error) {
+				console.log(error.status)
 			}
-			console.log(user)
+			this.status = 1
 		}
 	}
 }
