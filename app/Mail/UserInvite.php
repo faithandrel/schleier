@@ -32,7 +32,7 @@ class UserInvite extends Mailable
     {
         return $this->view('emails.invite')
                     ->with([
-                        'link' => url('signup?invite='.$this->token)
+                        'link' => url('/#/signup?invite='.$this->token)
                     ]);;
     }
 }

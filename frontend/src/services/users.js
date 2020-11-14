@@ -1,10 +1,11 @@
 import axios from 'axios'
+import { BACKEND } from '../constants.js'
 
 class Users {
   static async getAllUsers() {
     const Data = await axios({
       method: 'GET',
-      url: 'http://localhost:8000/api/users'
+      url: BACKEND + '/users'
     })
     return Data.data
   }
@@ -12,13 +13,37 @@ class Users {
   static async saveNewUser(name, email) {
     const Data = await axios({
       method: 'POST',
-      url: 'http://localhost:8000/api/users/add',
+      url: BACKEND + '/users/add',
       data: {
         name: name,
         email: email
       }
     })
-    console.log(Data)
+    return Data.data
+  }
+
+  static async getInvite(token) {
+    const Data = await axios({
+      method: 'POST',
+      url: BACKEND + '/invite',
+      data: {
+        token: token
+      }
+    })
+    return Data.data
+  }
+
+  static async saveProfile(user) {
+    const Data = await axios({
+      method: 'POST',
+      url: BACKEND + '/profile',
+      data: {
+        invite: user.invite,
+        email: user.email,
+        name: user.name,
+        password: user.password
+      }
+    })
     return Data.data
   }
 }

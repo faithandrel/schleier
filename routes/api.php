@@ -20,3 +20,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('users/add', 'App\Http\Controllers\UserController@add');
 Route::get('users', 'App\Http\Controllers\UserController@index');
+Route::post('invite', 'App\Http\Controllers\UserController@getInvite');
+Route::post('profile', 'App\Http\Controllers\UserController@saveProfile');
