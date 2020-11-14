@@ -1,12 +1,17 @@
 <template>
 	<div class="q-pa-md">
-		<div>
+		<div class="q-pa-sm">
 			<q-btn label="Add User" color="primary" @click="prompt = true" />
 			<q-btn label="Disable" color="red"
 				   v-if="selected.length > 0 " @click="disableUsers()" />
 		</div>
 		<q-dialog v-model="prompt" persistent>
 			<q-card style="min-width: 350px">
+				<q-card-section v-if="formErrors.length > 0">
+					<p class="text-red" v-for="(item, index) in formErrors" v-bind:key="index">
+						{{ item }}
+					</p>
+				</q-card-section>
 				<q-card-section>
 				  <div class="text-h6">Name</div>
 				</q-card-section>
@@ -23,7 +28,7 @@
 
 				<q-card-actions align="right" class="text-primary">
 				  <q-btn flat label="Cancel" v-close-popup />
-				  <q-btn flat label="Save" @click="saveNewUser()" v-close-popup />
+				  <q-btn flat label="Save" @click="saveNewUser()" />
 				</q-card-actions>
 			</q-card>
 		</q-dialog>
@@ -64,6 +69,7 @@ export default {
 	    	newEmail: '',
 	    	newUser: '',
 	    	selected: [],
+	    	formErrors: [],
 			columns: [
 				{
 					name: 'avatar',
@@ -157,10 +163,24 @@ export default {
 			this.rows = users
 		},
 		async saveNewUser() {
-			this.newUser = ''
-			this.newEmail = ''
-			await Users.saveNewUser(this.newUser, this.newEmail)
-			this.updateUsers()
+			this.formErrors = []
+
+			try {
+				await Users.saveNewUser(this.newUser, this.newEmail)
+				this.updateUsers()
+				this.newUser = ''
+				this.newEmail = ''
+				this.prompt = false
+			} catch (error) {
+				if (error.response.status === 422 && error.response.data.errors) {
+					for (const i in error.response.data.errors) {
+						const fieldErrors = error.response.data.errors[i]
+						for (const j in fieldErrors) {
+							this.formErrors.push(fieldErrors[j])
+						}
+					}
+				}
+			}
 		},
 		async disableUsers() {
 			const userIds = this.selected.map((user) => user.id)

@@ -2,6 +2,11 @@
 	<div class="q-pa-md">
 		<div v-if="status == 0">
 			<p>Register for {{ email }}</p>
+			<div v-if="formErrors.length > 0">
+				<p class="text-red" v-for="(item, index) in formErrors" v-bind:key="index">
+					{{ item }}
+				</p>
+			</div>
 			<q-input v-model="name" label="Name" stack-label />
 			<q-input v-model="password" label="Password" type="password" stack-label />
 		    <q-file v-model="avatar" label="Avatar" accept=".jpg, image/*">
@@ -9,7 +14,9 @@
 		        	<q-icon name="attach_file" />
 		        </template>
 		    </q-file>
-			<q-btn color="primary" label="Save" @click="saveProfile()" />
+		    <div class="q-pa-sm">
+				<q-btn color="primary" label="Save" @click="saveProfile()" />
+			</div>
 		</div>
 		<div v-if="status == 1">
 			<h4>Profile</h4>
@@ -36,7 +43,8 @@ export default {
 			avatar: null,
 			image: '',
 			invite: '',
-			status: 2
+			status: 2,
+			formErrors: []
 		}
 	},
 	async mounted() {
@@ -52,6 +60,8 @@ export default {
 	},
 	methods: {
 		async saveProfile() {
+			this.formErrors = []
+
 			try {
 				await Users.saveProfile({
 					invite: this.invite,
@@ -64,10 +74,17 @@ export default {
 					const image = await Users.saveAvatar(this.avatar, this.email)
 					this.image = BASE_URL + '/' + image
 				}
+				this.status = 1
 			} catch (error) {
-				console.log(error.status)
+				if (error.response.status === 422 && error.response.data.errors) {
+					for (const i in error.response.data.errors) {
+						const fieldErrors = error.response.data.errors[i]
+						for (const j in fieldErrors) {
+							this.formErrors.push(fieldErrors[j])
+						}
+					}
+				}
 			}
-			this.status = 1
 		}
 	}
 }
