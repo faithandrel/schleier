@@ -12,6 +12,7 @@ use App\Http\Requests\AddEmailRequest;
 use App\Http\Requests\ProfileRequest;
 use App\Models\User;
 use App\Mail\UserInvite;
+use App\Mail\WelcomeEmail;
 
 class UserController extends Controller
 {
@@ -62,6 +63,8 @@ class UserController extends Controller
 		$user->status = config('users.status.accepted');
 		$user->signed_up_at = Carbon::now();
 		$user->save();
+
+		Mail::to($user->email)->later(Carbon::now()->addMinutes(5), new WelcomeEmail());
 
 		return response()->json($user);
 	}
